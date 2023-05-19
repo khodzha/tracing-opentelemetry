@@ -370,6 +370,7 @@ impl<'a> field::Visit for SpanAttributeVisitor<'a> {
                         split_border -= 1;
                     }
                     value.truncate(split_border);
+                    value.push_str("... (truncated)");
 
                     self.record(KeyValue::new("truncated", true));
                 }
@@ -405,6 +406,7 @@ impl<'a> field::Visit for SpanAttributeVisitor<'a> {
                         split_border -= 1;
                     }
                     value.truncate(split_border);
+                    value.push_str("... (truncated)");
 
                     self.record(Key::new("truncated").bool(true));
                 }
