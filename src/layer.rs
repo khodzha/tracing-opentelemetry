@@ -193,6 +193,7 @@ impl<'a, 'b> field::Visit for SpanEventVisitor<'a, 'b> {
                         split_border -= 1;
                     }
                     value.truncate(split_border);
+                    value.push_str("... (truncated)");
 
                     self.event_builder
                         .attributes
@@ -226,6 +227,7 @@ impl<'a, 'b> field::Visit for SpanEventVisitor<'a, 'b> {
                         split_border -= 1;
                     }
                     value.truncate(split_border);
+                    value.push_str("... (truncated)");
 
                     self.event_builder
                         .attributes
