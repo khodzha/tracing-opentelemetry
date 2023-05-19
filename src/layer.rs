@@ -183,9 +183,24 @@ impl<'a, 'b> field::Visit for SpanEventVisitor<'a, 'b> {
             #[cfg(feature = "tracing-log")]
             name if name.starts_with("log.") => (),
             name => {
+                let mut value = value.to_string();
+                if value.len() > 2_000 {
+                    let mut split_border = 2000;
+                    for _ in 0..4 {
+                        if value.is_char_boundary(split_border) {
+                            break;
+                        }
+                        split_border -= 1;
+                    }
+                    value.truncate(split_border);
+
+                    self.event_builder
+                        .attributes
+                        .push(KeyValue::new("truncated", true));
+                }
                 self.event_builder
                     .attributes
-                    .push(KeyValue::new(name, value.to_string()));
+                    .push(KeyValue::new(name, value));
             }
         }
     }
@@ -201,9 +216,24 @@ impl<'a, 'b> field::Visit for SpanEventVisitor<'a, 'b> {
             #[cfg(feature = "tracing-log")]
             name if name.starts_with("log.") => (),
             name => {
+                let mut value = format!("{:?}", value);
+                if value.len() > 2_000 {
+                    let mut split_border = 2000;
+                    for _ in 0..4 {
+                        if value.is_char_boundary(split_border) {
+                            break;
+                        }
+                        split_border -= 1;
+                    }
+                    value.truncate(split_border);
+
+                    self.event_builder
+                        .attributes
+                        .push(KeyValue::new("truncated", true));
+                }
                 self.event_builder
                     .attributes
-                    .push(KeyValue::new(name, format!("{:?}", value)));
+                    .push(KeyValue::new(name, value));
             }
         }
     }
@@ -327,7 +357,22 @@ impl<'a> field::Visit for SpanAttributeVisitor<'a> {
             SPAN_STATUS_MESSAGE_FIELD => {
                 self.span_builder.status_message = Some(value.to_owned().into())
             }
-            _ => self.record(KeyValue::new(field.name(), value.to_string())),
+            _ => {
+                let mut value = value.to_string();
+                if value.len() > 2_000 {
+                    let mut split_border = 2000;
+                    for _ in 0..4 {
+                        if value.is_char_boundary(split_border) {
+                            break;
+                        }
+                        split_border -= 1;
+                    }
+                    value.truncate(split_border);
+
+                    self.record(KeyValue::new("truncated", true));
+                }
+                self.record(KeyValue::new(field.name(), value))
+            },
         }
     }
 
@@ -347,7 +392,22 @@ impl<'a> field::Visit for SpanAttributeVisitor<'a> {
             SPAN_STATUS_MESSAGE_FIELD => {
                 self.span_builder.status_message = Some(format!("{:?}", value).into())
             }
-            _ => self.record(Key::new(field.name()).string(format!("{:?}", value))),
+            _ => {
+                let mut value = format!("{:?}", value);
+                if value.len() > 2_000 {
+                    let mut split_border = 2000;
+                    for _ in 0..4 {
+                        if value.is_char_boundary(split_border) {
+                            break;
+                        }
+                        split_border -= 1;
+                    }
+                    value.truncate(split_border);
+
+                    self.record(Key::new("truncated").bool(true));
+                }
+                self.record(Key::new(field.name()).string(value))
+            },
         }
     }
 
